@@ -32,8 +32,22 @@ function App() {
     let tmp = [...list];
     tmp = tmp.map((mem) => {
       mem.percent = (+mem.originPrice / +totalOrginPrice) * 100;
-      mem.actualPrice = Math.ceil((mem.percent * +totalActualPrice) / 100);
+      mem.actualPrice =
+        Math.ceil((mem.percent * +totalActualPrice) / 1000 / 100) * 1000;
       return mem;
+    });
+    const afterActual = tmp.reduce((acc, cur) => {
+      return acc + cur.actualPrice;
+    }, 0);
+    const afterOrigin = tmp.reduce((acc, cur) => {
+      return acc + +cur.originPrice;
+    }, 0);
+    tmp.push({
+      id: "total",
+      name: "total",
+      originPrice: afterOrigin,
+      percent: "100",
+      actualPrice: afterActual,
     });
     setList(tmp);
   };
@@ -44,6 +58,12 @@ function App() {
   };
   const numberWithCommas = (x) => {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  };
+
+  const onRemove = (index) => {
+    const tmp = [...list];
+    tmp.splice(index, 1);
+    setList(tmp);
   };
 
   console.log("list", list);
@@ -70,11 +90,15 @@ function App() {
               <th>OriginPrice</th>
               <th>Percent</th>
               <th>ActualPrice</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>
             {list.map((item, index) => (
-              <tr className="item" key={index}>
+              <tr
+                className={`item ${item.id === "total" ? "total" : ""}`}
+                key={index}
+              >
                 <td>
                   <input
                     className="name"
@@ -102,6 +126,16 @@ function App() {
                     className="actual"
                     value={numberWithCommas(item.actualPrice)}
                   />
+                </td>
+                <td>
+                  <button
+                    tabIndex="-1"
+                    onClick={() => {
+                      onRemove(index);
+                    }}
+                  >
+                    X
+                  </button>
                 </td>
               </tr>
             ))}
